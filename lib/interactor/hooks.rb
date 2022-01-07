@@ -1,3 +1,5 @@
+require "active_support/concern"
+
 module Interactor
   # Internal: Methods relating to supporting hooks around Interactor invocation.
   module Hooks

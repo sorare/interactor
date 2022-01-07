@@ -2,9 +2,9 @@ require "interactor/context"
 require "interactor/declaration"
 require "interactor/error"
 require "interactor/hooks"
+require "interactor/organizer"
 
 require "active_support/concern"
-
 
 # Public: Interactor methods. Because Interactor is a module, custom Interactor
 # classes should include Interactor rather than inherit from it.
@@ -20,12 +20,10 @@ require "active_support/concern"
 #   end
 module Interactor
   extend ActiveSupport::Concern
+  include Hooks
+  include Declaration
 
-  # Internal: Install Interactor's behavior in the given class.
   included do
-    include Hooks
-    include Declaration
-
     # Public: Gets the Interactor::Context of the Interactor instance.
     attr_reader :context
   end
