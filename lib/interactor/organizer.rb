@@ -11,18 +11,11 @@ module Interactor
   #     organizer InteractorOne, InteractorTwo
   #   end
   module Organizer
-    # Internal: Install Interactor::Organizer's behavior in the given class.
-    def self.included(base)
-      base.class_eval do
-        include Interactor
-
-        extend ClassMethods
-        include InstanceMethods
-      end
-    end
+    extend ActiveSupport::Concern
+    include Interactor
 
     # Internal: Interactor::Organizer class methods.
-    module ClassMethods
+    class_methods do
       # Public: Declare Interactors to be invoked as part of the
       # Interactor::Organizer's invocation. These interactors are invoked in
       # the order in which they are declared.
@@ -67,17 +60,9 @@ module Interactor
       end
     end
 
-    # Internal: Interactor::Organizer instance methods.
-    module InstanceMethods
-      # Internal: Invoke the organized Interactors. An Interactor::Organizer is
-      # expected not to define its own "#call" method in favor of this default
-      # implementation.
-      #
-      # Returns nothing.
-      def call
-        self.class.organized.each do |interactor|
-          interactor.call!(context)
-        end
+    def call
+      self.class.organized.inject(context) do |ctx, interactor|
+        interactor.call!(ctx)
       end
     end
   end

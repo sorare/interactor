@@ -1,4 +1,4 @@
-require "ostruct"
+require "active_support/core_ext/module/delegation"
 
 module Interactor
   # Public: The object for tracking state of an Interactor's invocation. The
@@ -28,7 +28,7 @@ module Interactor
   #   # => "baz"
   #   context
   #   # => #<Interactor::Context foo="baz" hello="world">
-  class Context < OpenStruct
+  class Context
     # Internal: Initialize an Interactor::Context or preserve an existing one.
     # If the argument given is an Interactor::Context, the argument is returned.
     # Otherwise, a new Interactor::Context is initialized from the provided
@@ -53,7 +53,13 @@ module Interactor
     #
     # Returns the Interactor::Context.
     def self.build(context = {})
-      self === context ? context : new(context)
+      new(**context.to_h)
+    end
+
+    attr_accessor :error
+    delegate :to_s, to: :to_h
+
+    def initialize(*)
     end
 
     # Public: Whether the Interactor::Context is successful. By default, a new
@@ -120,62 +126,14 @@ module Interactor
     #   # => Interactor::Failure: #<Interactor::Context foo="baz">
     #
     # Raises Interactor::Failure initialized with the Interactor::Context.
-    def fail!(context = {})
-      context.each { |key, value| self[key.to_sym] = value }
+    def fail!(error: nil)
+      self.error = error
       @failure = true
       raise Failure, self
     end
 
-    # Internal: Track that an Interactor has been called. The "called!" method
-    # is used by the interactor being invoked with this context. After an
-    # interactor is successfully called, the interactor instance is tracked in
-    # the context for the purpose of potential future rollback.
-    #
-    # interactor - An Interactor instance that has been successfully called.
-    #
-    # Returns nothing.
-    def called!(interactor)
-      _called << interactor
-    end
-
-    # Public: Roll back the Interactor::Context. Any interactors to which this
-    # context has been passed and which have been successfully called are asked
-    # to roll themselves back by invoking their "rollback" instance methods.
-    #
-    # Examples
-    #
-    #   context = MyInteractor.call(foo: "bar")
-    #   # => #<Interactor::Context foo="baz">
-    #   context.rollback!
-    #   # => true
-    #   context
-    #   # => #<Interactor::Context foo="bar">
-    #
-    # Returns true if rolled back successfully or false if already rolled back.
-    def rollback!
-      return false if @rolled_back
-      _called.reverse_each(&:rollback)
-      @rolled_back = true
-    end
-
-    # Internal: An Array of successfully called Interactor instances invoked
-    # against this Interactor::Context instance.
-    #
-    # Examples
-    #
-    #   context = Interactor::Context.new
-    #   # => #<Interactor::Context>
-    #   context._called
-    #   # => []
-    #
-    #   context = MyInteractor.call(foo: "bar")
-    #   # => #<Interactor::Context foo="baz">
-    #   context._called
-    #   # => [#<MyInteractor @context=#<Interactor::Context foo="baz">>]
-    #
-    # Returns an Array of Interactor instances or an empty Array.
-    def _called
-      @called ||= []
+    def to_h
+      { error: error }
     end
   end
 end
