@@ -61,7 +61,7 @@ module Interactor
     end
 
     def call
-      self.class.organized.inject({}) do |ctx, interactor|
+      self.class.organized.inject(context) do |ctx, interactor|
         interactor.call!(ctx)
       end
     end
