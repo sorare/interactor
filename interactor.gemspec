@@ -2,10 +2,10 @@ require "English"
 
 Gem::Specification.new do |spec|
   spec.name = "interactor_with_steroids"
-  spec.version = "3.1.2"
+  spec.version = "0.0.1"
 
-  spec.author = "Collective Idea"
-  spec.email = "info@collectiveidea.com"
+  spec.author = "Collective Idea/Sorare Team"
+  spec.email = "hello@sorare.com"
   spec.description = "Interactor provides a common interface for performing complex user interactions."
   spec.summary = "Simple interactor implementation"
   spec.homepage = "https://github.com/sorare/interactor"
