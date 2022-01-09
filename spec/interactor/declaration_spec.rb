@@ -29,6 +29,33 @@ module Interactor
         it "can be initialized with foo" do
           expect(subject.new(foo: 'bar').foo).to eq('bar')
         end
+
+        context 'when duplicated in a submodule' do
+          let(:submodule) do
+            Module.new do
+              extend ActiveSupport::Concern
+
+              included do
+                receive :foo
+              end
+            end
+          end
+
+          let(:declared) {
+            build_declared do
+              include Submodule
+
+              receive :foo
+            end
+          }
+
+          before { stub_const("Submodule", submodule) }
+
+          it "can be initialized with foo" do
+            expect(subject.new(foo: 'bar').foo).to eq('bar')
+          end
+        end
+
       end
 
       context "with an optional argument" do

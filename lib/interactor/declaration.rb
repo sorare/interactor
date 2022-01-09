@@ -8,7 +8,6 @@ module Interactor
   module Declaration
     extend ActiveSupport::Concern
 
-    # Internal: Install Interactor's behavior in the given class.
     included do
       class_attribute :context_class, instance_writer: false, default: Context
     end
@@ -16,33 +15,35 @@ module Interactor
     class_methods do
       def receive(*required_arguments, **optional_arguments)
         @required_arguments ||= []
-        @required_arguments += required_arguments
+        new_required_arguments = required_arguments - @required_arguments
+        @required_arguments += new_required_arguments
 
-        delegate(*required_arguments, to: :context) unless required_arguments.empty?
+        delegate(*new_required_arguments, to: :context) unless new_required_arguments.empty?
         delegate(*optional_arguments.keys, to: :context) unless optional_arguments.empty?
 
-        attributes = [*required_arguments, *optional_arguments.keys]
+        attributes = [*new_required_arguments, *optional_arguments.keys]
 
         self.context_class = Class.new(context_class) do
-          attr_accessor *required_arguments
+          attr_accessor *new_required_arguments
           attr_writer *optional_arguments.keys
 
           optional_arguments.each do |k, v|
             define_method(k) do
-              return instance_variable_get("@#{k}") if instance_variable_defined?("@#{k}")
+              ivar = "@#{k}"
+              return instance_variable_get(ivar) if instance_variable_defined?(ivar)
 
-              v.is_a?(Proc) ? instance_eval(&v) : v
+              instance_variable_set(ivar, v.is_a?(Proc) ? instance_eval(&v) : v)
             end
           end
 
           class_eval %Q<
             def initialize(
-              #{required_arguments.map { |a| "#{a}:" }.join(', ')}#{required_arguments.empty? ? '' : ', '}
+              #{new_required_arguments.map { |a| "#{a}:" }.join(', ')}#{new_required_arguments.empty? ? '' : ', '}
               **rest
             )
               super(**rest)
 
-              #{required_arguments.map { |a| "self.#{a} = #{a}" }.join(';')}
+              #{new_required_arguments.map { |a| "self.#{a} = #{a}" }.join(';')}
 
               #{
                 optional_arguments.keys.map do |k|
