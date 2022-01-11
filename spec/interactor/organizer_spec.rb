@@ -1,8 +1,11 @@
 module Interactor
   describe Organizer do
-    include_examples :lint
-
-    let(:organizer) { Class.new.send(:include, Organizer) }
+    let(:organizer) {
+      Class.new do
+        include Organizer
+        include Declaration
+      end
+    }
 
     describe ".organize" do
       let(:interactor2) { double(:interactor2) }
@@ -34,9 +37,9 @@ module Interactor
     describe "#call" do
       let(:instance) { organizer.new }
       let(:context) { double(:context) }
-      let(:interactor2) { double(:interactor2) }
-      let(:interactor3) { double(:interactor3) }
-      let(:interactor4) { double(:interactor4) }
+      let(:interactor2) { Class.new.send(:include, Interactor) }
+      let(:interactor3) { Class.new.send(:include, Interactor) }
+      let(:interactor4) { Class.new.send(:include, Interactor) }
 
       before do
         allow(instance).to receive(:context) { context }
@@ -46,9 +49,9 @@ module Interactor
       end
 
       it "calls each interactor in order with the context" do
-        expect(interactor2).to receive(:call!).once.with(context).ordered
-        expect(interactor3).to receive(:call!).once.with(context).ordered
-        expect(interactor4).to receive(:call!).once.with(context).ordered
+        expect(interactor2).to receive(:call!).once.ordered
+        expect(interactor3).to receive(:call!).once.ordered
+        expect(interactor4).to receive(:call!).once.ordered
 
         instance.call
       end

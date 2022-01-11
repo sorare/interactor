@@ -1,7 +1,10 @@
 require "interactor/context"
+require "interactor/declaration"
 require "interactor/error"
 require "interactor/hooks"
 require "interactor/organizer"
+
+require "active_support/concern"
 
 # Public: Interactor methods. Because Interactor is a module, custom Interactor
 # classes should include Interactor rather than inherit from it.
@@ -16,19 +19,17 @@ require "interactor/organizer"
 #     end
 #   end
 module Interactor
-  # Internal: Install Interactor's behavior in the given class.
-  def self.included(base)
-    base.class_eval do
-      extend ClassMethods
-      include Hooks
+  extend ActiveSupport::Concern
+  include Hooks
+  include Declaration
 
-      # Public: Gets the Interactor::Context of the Interactor instance.
-      attr_reader :context
-    end
+  included do
+    # Public: Gets the Interactor::Context of the Interactor instance.
+    attr_reader :context
   end
 
   # Internal: Interactor class methods.
-  module ClassMethods
+  class_methods do
     # Public: Invoke an Interactor. This is the primary public API method to an
     # interactor.
     #
@@ -91,7 +92,7 @@ module Interactor
   #   MyInteractor.new
   #   # => #<MyInteractor @context=#<Interactor::Context>>
   def initialize(context = {})
-    @context = Context.build(context)
+    @context = self.context_class.build(context)
   end
 
   # Internal: Invoke an interactor instance along with all defined hooks. The
@@ -141,11 +142,10 @@ module Interactor
   def run!
     with_hooks do
       call
-      context.called!(self)
     end
-  rescue
-    context.rollback!
-    raise
+  rescue Failure => e
+    # Make sure we fail the current context when a call! to another interactor fails
+    context.fail!(error: e.context&.error)
   end
 
   # Public: Invoke an Interactor instance without any hooks, tracking, or
@@ -154,13 +154,5 @@ module Interactor
   #
   # Returns nothing.
   def call
-  end
-
-  # Public: Reverse prior invocation of an Interactor instance. Any interactor
-  # class that requires undoing upon downstream failure is expected to overwrite
-  # the "rollback" instance method.
-  #
-  # Returns nothing.
-  def rollback
   end
 end

@@ -1,15 +1,12 @@
+require "active_support/concern"
+
 module Interactor
   # Internal: Methods relating to supporting hooks around Interactor invocation.
   module Hooks
-    # Internal: Install Interactor's behavior in the given class.
-    def self.included(base)
-      base.class_eval do
-        extend ClassMethods
-      end
-    end
+    extend ActiveSupport::Concern
 
     # Internal: Interactor::Hooks class methods.
-    module ClassMethods
+    class_methods do
       # Public: Declare hooks to run around Interactor invocation. The around
       # method may be called multiple times; subsequent calls append declared
       # hooks to existing around hooks.
