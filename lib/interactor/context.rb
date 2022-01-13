@@ -133,7 +133,7 @@ module Interactor
 
     def assign_attributes(params)
       params.each do |attribute, value|
-        self.send("#{attribute}=", value)
+        self.send("#{attribute}=", value) if respond_to?(attribute)
       end
     end
 

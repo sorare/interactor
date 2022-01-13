@@ -36,6 +36,11 @@ module Interactor
           hash[:foo]
         }
       end
+
+      it "ignores any additional argument" do
+        hash = { foo: 'bar', bar: "baz" }
+        expect { interactor.context_class.build(hash) }.not_to raise_error
+      end
     end
 
     describe "#success?" do
