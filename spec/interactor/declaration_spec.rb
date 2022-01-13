@@ -23,11 +23,11 @@ module Interactor
         }
 
         it "cannot be initialized without foo" do
-          expect { subject.new }.to raise_error(ArgumentError)
+          expect { subject.build }.to raise_error(ArgumentError)
         end
 
         it "can be initialized with foo" do
-          expect(subject.new(foo: 'bar').foo).to eq('bar')
+          expect(subject.build(foo: 'bar').foo).to eq('bar')
         end
 
         context 'when duplicated in a submodule' do
@@ -52,7 +52,7 @@ module Interactor
           before { stub_const("Submodule", submodule) }
 
           it "can be initialized with foo" do
-            expect(subject.new(foo: 'bar').foo).to eq('bar')
+            expect(subject.build(foo: 'bar').foo).to eq('bar')
           end
         end
 
@@ -67,15 +67,15 @@ module Interactor
           }
 
           it "can be initialized without foo" do
-            expect(subject.new.foo).to eq('bar')
+            expect(subject.build.foo).to eq('bar')
           end
 
           it "can be initialized with foo" do
-            expect(subject.new(foo: 'baz').foo).to eq('baz')
+            expect(subject.build(foo: 'baz').foo).to eq('baz')
           end
 
           it "can be initialized with nil" do
-            expect(subject.new(foo: nil).foo).to be nil
+            expect(subject.build(foo: nil).foo).to be nil
           end
         end
 
@@ -87,11 +87,11 @@ module Interactor
           }
 
           it "can be initialized without foo" do
-            expect(subject.new.foo).to be nil
+            expect(subject.build.foo).to be nil
           end
 
           it "can be initialized with foo" do
-            expect(subject.new(foo: 'baz').foo).to eq('baz')
+            expect(subject.build(foo: 'baz').foo).to eq('baz')
           end
         end
 
@@ -103,11 +103,11 @@ module Interactor
           }
 
           it "can be initialized without foo" do
-            expect(subject.new(bar: 'bar').foo).to eq('bar')
+            expect(subject.build(bar: 'bar').foo).to eq('bar')
           end
 
           it "can be initialized with foo" do
-            expect(subject.new(bar: 'bar', foo: 'baz').foo).to eq('baz')
+            expect(subject.build(bar: 'bar', foo: 'baz').foo).to eq('baz')
           end
         end
       end
@@ -121,7 +121,7 @@ module Interactor
       }
 
       it 'can hold foo' do
-        c = subject.new
+        c = subject.build
         c.foo = 'bar'
         expect(c.foo).to eq('bar')
       end

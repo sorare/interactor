@@ -37,19 +37,19 @@ module Interactor
           end
 
           class_eval %Q<
-            def initialize(
+            def self.build(
               #{new_required_arguments.map { |a| "#{a}:" }.join(', ')}#{new_required_arguments.empty? ? '' : ', '}
               **rest
             )
-              super(**rest)
+              super(**rest).tap do |instance|
+                #{new_required_arguments.map { |a| "instance.#{a} = #{a}" }.join(';')}
 
-              #{new_required_arguments.map { |a| "self.#{a} = #{a}" }.join(';')}
-
-              #{
-                optional_arguments.keys.map do |k|
-                  "instance_variable_set('@#{k}', rest[:#{k}]) if rest.key?(:#{k})"
-                end.join("\n")
-              }
+                #{
+                  optional_arguments.keys.map do |k|
+                    "instance.instance_variable_set('@#{k}', rest[:#{k}]) if rest.key?(:#{k})"
+                  end.join("\n")
+                }
+              end
             end
           >
 

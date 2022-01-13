@@ -53,14 +53,13 @@ module Interactor
     #
     # Returns the Interactor::Context.
     def self.build(context = {})
-      new(**context.to_h)
+      new.tap do |instance|
+        instance.assign_attributes(context.to_h)
+      end
     end
 
     attr_accessor :error
     delegate :to_s, to: :to_h
-
-    def initialize(*)
-    end
 
     # Public: Whether the Interactor::Context is successful. By default, a new
     # context is successful and only changes when explicitly failed.
@@ -126,10 +125,16 @@ module Interactor
     #   # => Interactor::Failure: #<Interactor::Context foo="baz">
     #
     # Raises Interactor::Failure initialized with the Interactor::Context.
-    def fail!(error: nil)
-      self.error = error
+    def fail!(params = {})
+      assign_attributes(params)
       @failure = true
       raise Failure, self
+    end
+
+    def assign_attributes(params)
+      params.each do |attribute, value|
+        self.send("#{attribute}=", value)
+      end
     end
 
     def to_h
