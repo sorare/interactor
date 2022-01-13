@@ -52,7 +52,7 @@ describe Interactor do
     end
 
     it "initializes a blank context if none is given" do
-      expect(Interactor::Context).to receive(:build).once.with({}) { context }
+      expect(Interactor::Context).to receive(:build).once.with(no_args) { context }
 
       instance = interactor.new
 

@@ -92,7 +92,7 @@ module Interactor
   #   MyInteractor.new
   #   # => #<MyInteractor @context=#<Interactor::Context>>
   def initialize(context = {})
-    @context = self.context_class.build(context)
+    @context = self.context_class.build(**context.to_h)
   end
 
   # Internal: Invoke an interactor instance along with all defined hooks. The

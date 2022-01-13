@@ -27,7 +27,7 @@ module Interactor
 
       it "doesn't affect the original hash" do
         hash = { foo: "bar" }
-        context = interactor.context_class.build(hash)
+        context = interactor.context_class.build(**hash)
 
         expect(context).to be_a(interactor.context_class)
         expect {
@@ -39,7 +39,7 @@ module Interactor
 
       it "ignores any additional argument" do
         hash = { foo: 'bar', bar: "baz" }
-        expect { interactor.context_class.build(hash) }.not_to raise_error
+        expect { interactor.context_class.build(**hash) }.not_to raise_error
       end
     end
 
