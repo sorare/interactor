@@ -145,7 +145,7 @@ module Interactor
     end
   rescue Failure => e
     # Make sure we fail the current context when a call! to another interactor fails
-    context.fail!(error: e.context&.error)
+    context.fail!(error: e.context&.error, error_cause: e.cause)
   end
 
   # Public: Invoke an Interactor instance without any hooks, tracking, or

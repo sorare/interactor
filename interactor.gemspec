@@ -10,6 +10,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Simple interactor implementation"
   spec.homepage = "https://github.com/sorare/interactor"
   spec.license = "MIT"
+  spec.required_ruby_version = '>= 2.1'
 
   spec.files = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   spec.test_files = spec.files.grep(/^spec/)
