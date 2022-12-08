@@ -58,7 +58,7 @@ module Interactor
       end
     end
 
-    attr_accessor :error
+    attr_accessor :error, :error_cause
     delegate :to_s, to: :to_h
 
     # Public: Whether the Interactor::Context is successful. By default, a new

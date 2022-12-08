@@ -63,6 +63,8 @@ describe Interactor do
 
   describe "#run" do
     let(:instance) { interactor.new }
+    let(:exception_klass) { Class.new(Exception) }
+    let(:failure_cause) { exception_klass.new }
 
     it "runs the interactor" do
       expect(instance).to receive(:run!).once.with(no_args)
@@ -76,6 +78,15 @@ describe Interactor do
       expect {
         instance.run
       }.not_to raise_error
+    end
+
+    it "persists failure cause" do
+      expect(instance).to receive(:call).and_raise(
+        Interactor::Failure.new(instance.context), cause: failure_cause
+      )
+
+      instance.run
+      expect(instance.context.error_cause).to eq(failure_cause)
     end
 
     it "raises other errors" do
