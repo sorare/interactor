@@ -27,5 +27,12 @@ module Interactor
       @context = context
       super
     end
+
+    def cause_stack
+      causes = [context.error_cause]
+      causes << causes.last.cause while causes.last&.cause
+
+      causes.compact
+    end
   end
 end
