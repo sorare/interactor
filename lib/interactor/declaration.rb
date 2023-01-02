@@ -63,18 +63,26 @@ module Interactor
         end
       end
 
-      def hold(*held_fields)
-        @held_fields ||= []
-        @held_fields += held_fields
-
-        delegate(*@held_fields, to: :context)
+      def hold(*held_fields, **held_fields_with_default_value)
+        attributes = [*held_fields, *held_fields_with_default_value.keys]
+        delegate(*attributes, to: :context)
 
         self.context_class = Class.new(context_class) do
           attr_accessor *held_fields
+          attr_writer *held_fields_with_default_value.keys
+
+          held_fields_with_default_value.each do |k, v|
+            define_method(k) do
+              ivar = "@#{k}"
+              return instance_variable_get(ivar) if instance_variable_defined?(ivar)
+
+              instance_variable_set(ivar, v.is_a?(Proc) ? instance_eval(&v) : v)
+            end
+          end
 
           class_eval %Q<
             def to_h
-              super.merge(#{held_fields.map { |f| "#{f}: self.#{f}"}.join(', ')})
+              super.merge(#{attributes.map { |f| "#{f}: self.#{f}"}.join(', ')})
             end
           >
         end

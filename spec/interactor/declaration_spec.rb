@@ -125,6 +125,42 @@ module Interactor
         c.foo = 'bar'
         expect(c.foo).to eq('bar')
       end
+
+      context 'with default value' do
+        let(:declared) {
+          build_declared do
+            hold foo: 'bar'
+          end
+        }
+
+        it 'can hold foo with default value' do
+          c = subject.build
+          expect(c.foo).to eq('bar')
+
+          c.foo = 'baz'
+          expect(c.foo).to eq('baz')
+        end
+
+        context 'when default value is a proc' do 
+          let(:declared) {
+            build_declared do
+              hold foo: proc { [] }
+            end
+          }
+
+          it 'can hold foo with default value different for each new context through proc' do
+            c = subject.build
+            expect(c.foo).to eq([])
+
+            other_c = subject.build
+            expect(other_c.foo).to eq([])
+
+            c.foo << 'baz'
+            expect(c.foo).to eq(['baz'])
+            expect(other_c.foo).to eq([])
+          end
+        end
+      end
     end
   end
 end
