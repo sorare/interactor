@@ -14,20 +14,24 @@ module Interactor
 
     subject { declared.context_class }
 
-    describe "#receive" do
-      context "with a required argument" do
-        let(:declared) {
+    describe '#receive' do
+      context 'with a required argument' do
+        let(:declared) do
           build_declared do
             receive :foo
           end
-        }
+        end
 
-        it "cannot be initialized without foo" do
+        it 'cannot be initialized without foo' do
           expect { subject.build }.to raise_error(ArgumentError)
         end
 
-        it "can be initialized with foo" do
+        it 'can be initialized with foo' do
           expect(subject.build(foo: 'bar').foo).to eq('bar')
+        end
+
+        it 'can introspect the received arguments' do
+          expect(declared.received_arguments).to eq([:foo])
         end
 
         context 'when duplicated in a submodule' do
@@ -41,79 +45,82 @@ module Interactor
             end
           end
 
-          let(:declared) {
+          let(:declared) do
             build_declared do
               include Submodule
 
               receive :foo
             end
-          }
+          end
 
-          before { stub_const("Submodule", submodule) }
+          before { stub_const('Submodule', submodule) }
 
-          it "can be initialized with foo" do
+          it 'can be initialized with foo' do
             expect(subject.build(foo: 'bar').foo).to eq('bar')
           end
         end
-
       end
 
-      context "with an optional argument" do
-        context "with a constant default value" do
-          let(:declared) {
+      context 'with an optional argument' do
+        context 'with a constant default value' do
+          let(:declared) do
             build_declared do
               receive foo: 'bar'
             end
-          }
+          end
 
-          it "can be initialized without foo" do
+          it 'can be initialized without foo' do
             expect(subject.build.foo).to eq('bar')
           end
 
-          it "can be initialized with foo" do
+          it 'can be initialized with foo' do
             expect(subject.build(foo: 'baz').foo).to eq('baz')
           end
 
-          it "can be initialized with nil" do
+          it 'can be initialized with nil' do
             expect(subject.build(foo: nil).foo).to be nil
           end
         end
 
-        context "with a nil default value" do
+        context 'with a nil default value' do
           let(:declared) {
             build_declared do
               receive foo: nil
             end
           }
 
-          it "can be initialized without foo" do
+          it 'can be initialized without foo' do
             expect(subject.build.foo).to be nil
           end
 
-          it "can be initialized with foo" do
+          it 'can be initialized with foo' do
             expect(subject.build(foo: 'baz').foo).to eq('baz')
           end
         end
 
-        context "with a Proc default value" do
+        context 'with a Proc default value' do
           let(:declared) {
             build_declared do
               receive :bar, foo: ->(context) { context.bar }
             end
           }
 
-          it "can be initialized without foo" do
+          it 'can be initialized without foo' do
             expect(subject.build(bar: 'bar').foo).to eq('bar')
           end
 
-          it "can be initialized with foo" do
+          it 'can be initialized with foo' do
             expect(subject.build(bar: 'bar', foo: 'baz').foo).to eq('baz')
+          end
+
+          it 'can introspect the received arguments' do
+            expect(declared.received_arguments).to eq(%i[bar foo])
           end
         end
       end
     end
 
-    describe "#hold" do
+    describe '#hold' do
       let(:declared) {
         build_declared do
           hold :foo
@@ -124,6 +131,10 @@ module Interactor
         c = subject.build
         c.foo = 'bar'
         expect(c.foo).to eq('bar')
+      end
+
+      it 'can introspect the held attributes' do
+        expect(declared.held_attributes).to eq([:foo])
       end
 
       context 'with default value' do
@@ -141,7 +152,7 @@ module Interactor
           expect(c.foo).to eq('baz')
         end
 
-        context 'when default value is a proc' do 
+        context 'when default value is a proc' do
           let(:declared) {
             build_declared do
               hold foo: proc { [] }
