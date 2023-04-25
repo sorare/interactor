@@ -83,11 +83,11 @@ module Interactor
         end
 
         context 'with a nil default value' do
-          let(:declared) {
+          let(:declared) do
             build_declared do
               receive foo: nil
             end
-          }
+          end
 
           it 'can be initialized without foo' do
             expect(subject.build.foo).to be nil
@@ -99,11 +99,11 @@ module Interactor
         end
 
         context 'with a Proc default value' do
-          let(:declared) {
+          let(:declared) do
             build_declared do
               receive :bar, foo: ->(context) { context.bar }
             end
-          }
+          end
 
           it 'can be initialized without foo' do
             expect(subject.build(bar: 'bar').foo).to eq('bar')
@@ -114,18 +114,19 @@ module Interactor
           end
 
           it 'can introspect the received arguments' do
-            expect(declared.received_arguments).to eq(%i[bar foo])
+            expect(declared.received_arguments).to eq(%i[bar])
+            expect(declared.received_optional_arguments).to eq(%i[foo])
           end
         end
       end
     end
 
     describe '#hold' do
-      let(:declared) {
+      let(:declared) do
         build_declared do
           hold :foo
         end
-      }
+      end
 
       it 'can hold foo' do
         c = subject.build
@@ -138,11 +139,11 @@ module Interactor
       end
 
       context 'with default value' do
-        let(:declared) {
+        let(:declared) do
           build_declared do
             hold foo: 'bar'
           end
-        }
+        end
 
         it 'can hold foo with default value' do
           c = subject.build
@@ -153,11 +154,11 @@ module Interactor
         end
 
         context 'when default value is a proc' do
-          let(:declared) {
+          let(:declared) do
             build_declared do
               hold foo: proc { [] }
             end
-          }
+          end
 
           it 'can hold foo with default value different for each new context through proc' do
             c = subject.build

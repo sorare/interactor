@@ -18,7 +18,8 @@ module Interactor
         new_required_arguments = required_arguments - @required_arguments
         @required_arguments += new_required_arguments
 
-        (required_arguments + optional_arguments.keys).each { |arg| received_arguments << arg }
+        required_arguments.each { |arg| received_arguments << arg }
+        optional_arguments.keys.each { |arg| received_optional_arguments << arg }
 
         delegate(*new_required_arguments, to: :context) unless new_required_arguments.empty?
         delegate(*optional_arguments.keys, to: :context) unless optional_arguments.empty?
@@ -67,6 +68,10 @@ module Interactor
 
       def received_arguments
         @received_arguments ||= []
+      end
+
+      def received_optional_arguments
+        @received_optional_arguments ||= []
       end
 
       def hold(*held_fields, **held_fields_with_default_value)
