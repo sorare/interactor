@@ -18,6 +18,8 @@ module Interactor
         new_required_arguments = required_arguments - @required_arguments
         @required_arguments += new_required_arguments
 
+        (required_arguments + optional_arguments.keys).each { |arg| received_arguments << arg }
+
         delegate(*new_required_arguments, to: :context) unless new_required_arguments.empty?
         delegate(*optional_arguments.keys, to: :context) unless optional_arguments.empty?
 
@@ -63,9 +65,15 @@ module Interactor
         end
       end
 
+      def received_arguments
+        @received_arguments ||= []
+      end
+
       def hold(*held_fields, **held_fields_with_default_value)
         attributes = [*held_fields, *held_fields_with_default_value.keys]
         delegate(*attributes, to: :context)
+
+        attributes.each { |attr| held_attributes << attr }
 
         self.context_class = Class.new(context_class) do
           attr_accessor *held_fields
@@ -87,6 +95,10 @@ module Interactor
           >
         end
 
+      end
+
+      def held_attributes
+        @held_attributes ||= []
       end
     end
   end
